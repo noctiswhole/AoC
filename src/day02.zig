@@ -146,6 +146,10 @@ pub fn main() !void {
     const sum = try sumLines(data, targetGame);
 
     std.debug.print("Sum: {d}\n", .{sum});
+
+    const sum2 = try sumLines2(data);
+
+    std.debug.print("Sum2: {d}\n", .{sum2});
 }
 
 test "test-test-data" {
