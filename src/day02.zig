@@ -108,7 +108,7 @@ fn sumLines(input: []const u8, targetGame: Game) !u32 {
     var sum: u32 = 0;
     while (lines.next()) | line | {
         if (line.len > 0) {
-            std.debug.print("Line: \"{s}\"\n", .{line});
+            // std.debug.print("Line: \"{s}\"\n", .{line});
             const game = try parseLine(line);
             if (game.r <= targetGame.r and game.b <= targetGame.b and game.g <= targetGame.g) {
                 sum += game.id;
@@ -118,8 +118,34 @@ fn sumLines(input: []const u8, targetGame: Game) !u32 {
     return sum;
 }
 
+fn sumLines2(input: []const u8) !u32 {
+    var lines = std.mem.split(u8, input, "\n");
+    var sum: u32 = 0;
+
+    while (lines.next()) | line | {
+        if (line.len > 0) {
+            const game = try parseLine(line);
+            sum += calculatePower(game);
+
+        }
+    }
+    return sum;
+}
+
+fn calculatePower(game: Game) u32 {
+    return game.r * game.b * game.g;
+}
+
 pub fn main() !void {
-    
+    const targetGame = Game{
+        .id = 0,
+        .r = 12,
+        .g = 13,
+        .b = 14,
+    };
+    const sum = try sumLines(data, targetGame);
+
+    std.debug.print("Sum: {d}\n", .{sum});
 }
 
 test "test-test-data" {
@@ -135,15 +161,27 @@ test "test-test-data" {
     try std.testing.expectEqual(sum, 8);
 }
 
+test "test-sum-power" {
+    const input = @embedFile("data/day02test.txt");
+    const sum = try sumLines2(input);
+
+    try std.testing.expectEqual(sum, 2286);
+}
+
 test "test-generate-game" {
     const testline = "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green";
     const testGame = try parseLine(testline);
-    std.debug.print("Output: id {d} r {d} g {d} b {d}\n", .{testGame.id, testGame.r, testGame.g, testGame.b});
+    // std.debug.print("Output: id {d} r {d} g {d} b {d}\n", .{testGame.id, testGame.r, testGame.g, testGame.b});
     try std.testing.expectEqual(std.meta.eql(testGame, Game{
         .id = 1,
         .r = 4,
         .g = 2,
         .b = 6,
     }), true);
+}
 
+test "test-calculate-power" {
+    const testline = "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green";
+    const testGame = try parseLine(testline);
+    try std.testing.expectEqual(calculatePower(testGame), 48);
 }
