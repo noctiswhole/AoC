@@ -30,8 +30,20 @@ Created a tree to index valid word representation of numbers. Iterated through e
 
 ### Part One
 
+#### Problem
+
+Each line contains an ID and red, green, blue (rgb) values. Limits to red, green, blue are defined. The solution is the sum of IDs for all lines that are inside the defined limits.
+
+#### Solution
+
 Solved by parsing each line to get the highest number of red, green, and blue cubes across all runs, and compared the result against the limit of cubes to get a sum of game IDs.
 
 ### Part Two
+
+#### Problem
+
+Solution is each largest value of RGB multiplied together in each line, and summed together. 
+
+#### Solution
 
 Used the parser from part one and iterated through all game runs to sum up the cube powers.
