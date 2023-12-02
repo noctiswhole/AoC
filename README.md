@@ -2,6 +2,11 @@
 
 Using AoC to learn Zig.
 
+# Table of Contents
+
+1. [Day One](#day-one)
+2. [Day Two](#day-two)
+
 # Solutions
 
 ## Day One
