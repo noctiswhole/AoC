@@ -103,8 +103,36 @@ fn parseLine(line: []const u8) !Game {
     return game;
 }
 
+fn sumLines(input: []const u8, targetGame: Game) !u32 {
+    var lines = std.mem.split(u8, input, "\n");
+    var sum: u32 = 0;
+    while (lines.next()) | line | {
+        if (line.len > 0) {
+            std.debug.print("Line: \"{s}\"\n", .{line});
+            const game = try parseLine(line);
+            if (game.r <= targetGame.r and game.b <= targetGame.b and game.g <= targetGame.g) {
+                sum += game.id;
+            }
+        }
+    }
+    return sum;
+}
+
 pub fn main() !void {
     
+}
+
+test "test-test-data" {
+    const input = @embedFile("data/day02test.txt");
+    const targetGame = Game{
+        .id = 0,
+        .r = 12,
+        .g = 13,
+        .b = 14,
+    };
+    const sum = try sumLines(input, targetGame);
+
+    try std.testing.expectEqual(sum, 8);
 }
 
 test "test-generate-game" {
