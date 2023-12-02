@@ -174,6 +174,11 @@ fn charToInt(c: u8) Error!u8 {
     };
 }
 
+// Generated from template/template.zig.
+// Run `zig build generate` to update.
+// Only unmodified days will be updated.
+
+
 fn parseCalibrationValue(input: []const u8, tree: *Tree) u32 {
     const length = input.len;
     std.debug.print("Length of input is {d}\n", .{length});
