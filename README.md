@@ -13,6 +13,8 @@ Using AoC to learn Zig.
 
 ### Part One
 
+[day01.zig](src/day01.zig)
+
 #### Problem
 
 Find the first and last numbers in a line in char form, and form a two digit number with them. The solution is the sum of all two digit numbers.
@@ -22,6 +24,8 @@ Find the first and last numbers in a line in char form, and form a two digit num
 Solved using ascii character/u8 math. Any character between 0 and 9 were valid characters, and character was converted by subtracting a valid character by the literal '0'.
 
 ### Part Two
+
+[day01-02.zig](src/day01-02.zig)
 
 #### Problem
 
@@ -35,6 +39,8 @@ Created a tree to index valid word representation of numbers. Iterated through e
 
 ### Part One
 
+[day02.zig](src/day02.zig)
+
 #### Problem
 
 Each line contains an ID and red, green, blue (rgb) values. Limits to red, green, blue are defined. The solution is the sum of IDs for all lines that are inside the defined limits.
@@ -44,6 +50,8 @@ Each line contains an ID and red, green, blue (rgb) values. Limits to red, green
 Solved by parsing each line to get the highest number of red, green, and blue cubes across all runs, and compared the result against the limit of cubes to get a sum of game IDs.
 
 ### Part Two
+
+[day02.zig](src/day02.zig)
 
 #### Problem
 
