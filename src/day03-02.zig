@@ -70,87 +70,153 @@ fn solve(input: []const u8) !u32 {
     // account for newline character too
     const width = try calculateRowWidth(input) + 1;
     var foundInt: u32 = 0;
+    foundInt = 0;
     var hasSymbol = false;
+    hasSymbol = false;
     var sum: u32 = 0;
+    sum = 0;
 
     for (0..length) | i |{
-        if (characterToInt(input[i])) | n | {
-            // shift numbers one position and append n to found integer
-            foundInt = foundInt * 10 + n;
-            if (!hasSymbol) {
-                hasSymbol = hasNeighboringSymbol(input, width, i);
-            }
-        } else |_| {
-            // Found an integer's end, so we add it to the sum if it meets the rules and reset vars
-            if (foundInt > 0) {
-                if (hasSymbol == true) {
-                    sum += foundInt;
-                }
-                hasSymbol = false;
-                foundInt = 0;
-            }
+        if (input[i] == '*') {
+            sum += try calculateNeighboringNumbers(input, width, i);
         }
     }
     return sum;
 }
 
-fn hasNeighboringSymbol(input: []const u8, lineWidth: usize, position: usize) bool {
+// Iterate through input and calculate ratios for any where there's a '*' character
+fn calculateNeighboringNumbers(input: []const u8, lineWidth: usize, position: usize) !u32 {
     const length = input.len;
     const linePos = position % lineWidth;
+    const lineNum: usize = position / lineWidth;
 
-    const checkLeft = linePos > 1;
-    const checkRight = linePos < lineWidth - 1;
     const checkUp = position > lineWidth;
     const checkDown = position < (length - lineWidth);
 
-    // Check left positions if we're not on the left most side on the grid
-    if (checkLeft) {
-        const leftPosition = position - 1;
-        if (
-            (isValidSymbol(input[leftPosition])) or
-            (checkUp and isValidSymbol(input[leftPosition - lineWidth])) or
-            (checkDown and isValidSymbol(input[leftPosition + lineWidth]))
-        ) {
-            return true;
-        }
-    }
-    // Check right positions if we're not on the right most side on the grid
-    if (checkRight) {
-        const rightPosition = position + 1;
-        if (
-            (isValidSymbol(input[rightPosition])) or
-            (checkUp and isValidSymbol(input[rightPosition - lineWidth])) or
-            (checkDown and isValidSymbol(input[rightPosition + lineWidth]))
-        ) {
-            return true;
-        }
+
+    var totalNumbers: u32 = 0;
+    var ratio: u32= 0;
+
+    if (checkUp) {
+        // get total values for line above
+        const lineStart = (lineNum - 1) * lineWidth;
+        const lineEnd = lineNum * lineWidth;
+        const line = input[lineStart .. lineEnd];
+        const result = try findNumbers(line, linePos);
+
+        totalNumbers += result[0];
+        ratio = result[1];
     }
 
-    // Check center positions
-    if ((checkUp and isValidSymbol(input[position - lineWidth])) 
-        or (checkDown and isValidSymbol(input[position + lineWidth])))
-    {
-        return true;
+    if (checkDown) {
+        // get total values for line below
+        const lineStart = (lineNum + 1) * lineWidth;
+        const lineEnd = (lineNum + 2) * lineWidth;
+        const line = input[lineStart .. lineEnd];
+        const result = try findNumbers(line, linePos);
+        if (result[0] != 0) {
+            ratio = @max(result[1] * ratio, result[1]);
+        }
+        totalNumbers += result[0];
     }
 
-    return false;
+    // get total values for current line
+    const lineStart = lineNum * lineWidth;
+    const lineEnd = (lineNum + 1) * lineWidth;
+    const line = input[lineStart .. lineEnd];
+    const result = try findNumbers(line, linePos);
+    if (result[0] != 0) {
+        totalNumbers += result[0];
+        ratio = @max(result[1] * ratio, result[1]);
+    }
+
+    if (totalNumbers != 2) {
+        return 0;
+    } else {
+        return ratio;
+    }
 }
 
-fn isValidSymbol(character: u8) bool {
+// Returns the number of matches, and the product of the numbers 
+fn findNumbers(line: []const u8, position: usize) ![2]u32 {
+    const length = line.len;
+    const checkLeft = position > 0;
+    const checkRight = position < length - 1;
+    var total: u32 = 0;
+    var found: u32 = 0;
+
+    // we need to find the start and end of the numbers in the string
+    if (isValidDigit(line[position])) {
+        // if the center character is a number, there can only be one total number
+        const numberStart = walkLeft(line, position);
+        const numberEnd = walkRight(line, position);
+        const numberToParse = line[numberStart..(numberEnd+1)];
+        total = try parseInt(u32, numberToParse, 10);
+        found += 1;
+    } else {
+        // find number bordering on the left
+        if (checkLeft and isValidDigit(line[position - 1])) {
+            const numberStart = walkLeft(line, position - 1);
+            const numberToParse = line[numberStart..position];
+            total = try parseInt(u32, numberToParse, 10);
+            found += 1;
+        }
+        // find number bordering on the right
+        if (checkRight and isValidDigit(line[position + 1])) {
+            const numberEnd = walkRight(line, position + 1);
+            const numberToParse = line[(position + 1)..(numberEnd + 1)];
+            const parsedNumber = try parseInt(u32, numberToParse, 10);
+            total = @max(total * parsedNumber, parsedNumber);
+            found += 1;
+        }
+    }
+    return .{found, total};
+}
+
+// move cursor left until we find the beginning of a number
+fn walkLeft(input: []const u8, position: usize) usize {
+    var i = position;
+    while (i >= 0 and isValidDigit(input[i])) {
+        if (i == 0) {
+            return 0;
+        }
+        i -= 1;
+    }
+
+    return i + 1;
+}
+
+// move cursor right until we find the end of a number
+fn walkRight(input: []const u8, position: usize) usize {
+    var i = position;
+    const length = input.len;
+    while (i < length and isValidDigit(input[i])) {
+        i += 1;
+    }
+
+    return i - 1;
+}
+
+fn isValidDigit(character: u8) bool {
     return switch (character) {
-        '.', '\n', '0' ... '9' => false,
-        else => true
+        '0' ... '9' => true,
+        else => false
     };
+}
+
+test "test-find-number-row" {
+    const totals = try findNumbers("5*111", 1);
+    
+    try std.testing.expectEqual(std.meta.eql(totals, .{2, 555}), true);
 }
 
 test "test-input" {
     const sum = try solve(testInput);
-    try std.testing.expectEqual(sum, 4361);
+    try std.testing.expectEqual(sum, 467835);
 }
 
 test "test-row-width" {
     try std.testing.expectEqual(try calculateRowWidth(testInput), 10);
     try std.testing.expectError(Error.ScalarNotFound, calculateRowWidth("asdf"));
 }
-
 
