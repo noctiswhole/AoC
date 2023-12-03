@@ -8,11 +8,12 @@ const BitSet = std.DynamicBitSet;
 const util = @import("util.zig");
 const gpa = util.gpa;
 
-const data = @embedFile("data/day03.txt");
+const Error = error{
+    ScalarNotFound  
+};
 
-pub fn main() !void {
-    
-}
+const data = @embedFile("data/day03.txt");
+const testInput = @embedFile("data/day03test.txt");
 
 // Useful stdlib functions
 const tokenizeAny = std.mem.tokenizeAny;
@@ -41,6 +42,39 @@ const sort = std.sort.block;
 const asc = std.sort.asc;
 const desc = std.sort.desc;
 
-// Generated from template/template.zig.
-// Run `zig build generate` to update.
-// Only unmodified days will be updated.
+const ParseIntError = error{InvalidChar};
+
+fn characterToInt(character: u8) !u8 {
+    return switch (character) {
+        '0' ... '9' => character - '0',
+        else => ParseIntError.InvalidChar
+    };
+}
+
+pub fn main() !void {
+
+    
+}
+
+pub fn calculateRowWidth(input: []const u8) !usize {
+    const width = indexOf(u8, input, '\n');
+    if (width) | w | {
+        return w;
+    } else {
+        return Error.ScalarNotFound;
+    }
+}
+
+fn isValidSymbol(character: u8) bool {
+    return switch (character) {
+        '.', '\n', '0' ... '9' => false,
+        else => true
+    };
+}
+
+test "test-row-width" {
+    try std.testing.expectEqual(try calculateRowWidth(testInput), 10);
+    try std.testing.expectError(Error.ScalarNotFound, calculateRowWidth("asdf"));
+}
+
+
