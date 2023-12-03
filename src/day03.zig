@@ -52,8 +52,8 @@ fn characterToInt(character: u8) !u8 {
 }
 
 pub fn main() !void {
-
-    
+    const sum = try solve(data);
+    std.debug.print("Solution: {d}", .{sum});
 }
 
 pub fn calculateRowWidth(input: []const u8) !usize {
