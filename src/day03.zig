@@ -65,11 +65,87 @@ pub fn calculateRowWidth(input: []const u8) !usize {
     }
 }
 
+fn solve(input: []const u8) !u32 {
+    const length = input.len;
+    // account for newline character too
+    const width = try calculateRowWidth(input) + 1;
+    var foundInt: u32 = 0;
+    var hasSymbol = false;
+    var sum: u32 = 0;
+
+    for (0..length) | i |{
+        if (characterToInt(input[i])) | n | {
+            // shift numbers one position and append n to found integer
+            foundInt = foundInt * 10 + n;
+            if (!hasSymbol) {
+                hasSymbol = hasNeighboringSymbol(input, width, i);
+            }
+        } else |_| {
+            // Found an integer's end, so we add it to the sum if it meets the rules and reset vars
+            if (foundInt > 0) {
+                if (hasSymbol == true) {
+                    sum += foundInt;
+                }
+                hasSymbol = false;
+                foundInt = 0;
+            }
+        }
+    }
+    return sum;
+}
+
+fn hasNeighboringSymbol(input: []const u8, lineWidth: usize, position: usize) bool {
+    const length = input.len;
+    const linePos = position % lineWidth;
+
+    const checkLeft = linePos > 1;
+    const checkRight = linePos < lineWidth - 1;
+    const checkUp = position > lineWidth;
+    const checkDown = position < (length - lineWidth);
+
+    // Check left positions if we're not on the left most side on the grid
+    if (checkLeft) {
+        const leftPosition = position - 1;
+        if (
+            (isValidSymbol(input[leftPosition])) or
+            (checkUp and isValidSymbol(input[leftPosition - lineWidth])) or
+            (checkDown and isValidSymbol(input[leftPosition + lineWidth]))
+        ) {
+            return true;
+        }
+    }
+    // Check right positions if we're not on the right most side on the grid
+    if (checkRight) {
+        const rightPosition = position + 1;
+        if (
+            (isValidSymbol(input[rightPosition])) or
+            (checkUp and isValidSymbol(input[rightPosition - lineWidth])) or
+            (checkDown and isValidSymbol(input[rightPosition + lineWidth]))
+        ) {
+            return true;
+        }
+    }
+
+    // Check center positions
+    if ((checkUp and isValidSymbol(input[position - lineWidth])) 
+        or (checkDown and isValidSymbol(input[position + lineWidth])))
+    {
+        return true;
+    }
+
+    return false;
+}
+
 fn isValidSymbol(character: u8) bool {
     return switch (character) {
         '.', '\n', '0' ... '9' => false,
         else => true
     };
+}
+
+test "test-input" {
+    const sum = try solve(testInput);
+    try std.testing.expectEqual(sum, 4361);
 }
 
 test "test-row-width" {
