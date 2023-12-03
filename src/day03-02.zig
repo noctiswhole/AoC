@@ -137,7 +137,7 @@ fn calculateNeighboringNumbers(input: []const u8, lineWidth: usize, position: us
     }
 }
 
-// Returns the number of matches, and the product of the numbers 
+// Returns the number of matches, and the product of the numbers, for a given line
 fn findNumbers(line: []const u8, position: usize) ![2]u32 {
     const length = line.len;
     const checkLeft = position > 0;
